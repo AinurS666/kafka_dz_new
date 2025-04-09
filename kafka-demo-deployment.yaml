@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-demo-app
+  labels:
+    app: kafka-demo
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-demo-app
+  template:
+    metadata:
+      labels:
+        app: kafka-demo-app
+    spec:
+      containers:
+      - name: kafka-demo-app
+        image: kafka-demo-app:latest # Замените на ваш Docker-образ
+        ports:
+        - containerPort: 80 # Порт, на котором работает приложение

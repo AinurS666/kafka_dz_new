@@ -1,0 +1,50 @@
+stages:
+  - build
+  - test
+  - deploy
+
+variables:
+  DOCKER_IMAGE: myapp
+  DOCKER_TAG: <latex iconid='0'>DOCKER_IMAGE:<latex iconid='1'>CI_REGISTRY_USER" -p "<latex iconid='2'>CI_REGISTRY
+    - docker push <latex iconid='3'>DOCKER_TAG
+  only:
+    - master
+    - develop
+
+unit_tests:
+  stage: test
+  image: python:3.10.2
+  script:
+    - pip install --no-cache-dir -r requirements.txt
+    - pytest tests/unit
+  only:
+    - master
+    - develop
+
+integration_tests:
+  stage: test
+  image: docker:latest
+  services:
+    - docker:dind
+  before_script:
+    # Запуск docker-compose для поднятия Kafka и сопутствующих сервисов
+    - apk add --no-cache docker-compose
+    - docker-compose up -d
+    # Небольшая задержка для инициализации Kafka (можно использовать wait-for-it или аналогичный скрипт)
+    - sleep 10
+  script:
+    - echo "Запуск интеграционных тестов..."
+    - pip install --no-cache-dir -r requirements.txt
+    - pytest tests/integration
+  only:
+    - master
+    - develop
+
+deploy:
+  stage: deploy
+  image: docker:latest
+  script:
+    - echo "Деплой в тестовую/продакшн среду..."
+    - ./deploy_script.sh <latex iconid='4'>DOCKER_TAG
+  only:
+    - master
